@@ -7,10 +7,10 @@ const validarJwt = (req,res = response, next) =>{
   try {
     //Leer token
     const token = req.header('x-token');
-
+    
     if(!token){
-      return res.status(401).json({
-        ok:false,
+      return res.json({
+        codigo:401,
         msg:'No hay token en la petición',
       });
     }
@@ -20,8 +20,8 @@ const validarJwt = (req,res = response, next) =>{
 
     next();
   } catch (error) {
-    return res.status(401).json({
-      ok:false,
+    return res.json({
+      codigo:401,
       msg:'El token no es valido',
     });
   }

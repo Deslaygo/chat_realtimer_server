@@ -10,11 +10,12 @@ const crearUsuario = async (req,  res = response)=>{
     //se extraen datos de request
     const { email, password } = req.body;
     const usuario = new Usuario(req.body);
+    console.log(req.body);
 
     const existeEmail = await Usuario.findOne({ email });
     if(existeEmail){
-      return res.status(400).json({
-        ok:false,
+      return res.json({
+        codigo:400,
         msg:'El correo ya esta registrado',
       });
     }
@@ -27,19 +28,19 @@ const crearUsuario = async (req,  res = response)=>{
     //Se genera jwt token
     const token = await generarJwt( usuario.id );
 
-
-
     res.json({
-      ok:true,
+      codigo:200,
       msg:'Crea usuario correctamente',
-      usuario,
-      token
+      data:{
+        usuario,
+        token
+      }
     });
     
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      ok:false,
+    res.json({
+      codigo:400,
       msg:'Ocurrio un error al crear usuario',
     })
   }
@@ -55,8 +56,8 @@ const login = async (req, res = response) => {
     const usuarioDB = await Usuario.findOne({ email });
 
     if(!usuarioDB){
-      return res.status(404).json({
-        ok: false,
+      return res.json({
+        codigo:400,
         msg:'Usuario no encontrado',
       });
     }
@@ -65,8 +66,8 @@ const login = async (req, res = response) => {
     const validPassword = bcrypt.compareSync(password, usuarioDB.password);
 
     if(!validPassword){
-      return res.status(400).json({
-        ok: false,
+      return res.json({
+        codigo:400,
         msg:'Las credenciales son incorrectas',
       });
     }
@@ -74,15 +75,17 @@ const login = async (req, res = response) => {
     const token = await generarJwt(usuarioDB.id);
 
     res.json({
-      ok:true,
+      codigo:200,
       msg:'usuario logeado correctamente',
-      usuario:usuarioDB,
-      token,
+      data:{
+        usuario:usuarioDB,
+        token
+      }
     })
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      ok:false,
+    res.json({
+      codigo:400,
       msg:'Ocurrio un error al crear usuario',
     })
   }
@@ -90,23 +93,23 @@ const login = async (req, res = response) => {
 
 const renewToken = async (req,res = response) => {
   try {
-    const {uid} = req.uid;
-
+    const uid = req.uid;
+    
     const token = await generarJwt(uid);
-
-    const usuarioDB = await Usuario.findById({uid});
-
+    const usuarioDB = await Usuario.findById({_id:uid});
     res.json({
-      ok:true,
+      codigo:200,
       msg:'Token renovado correctamente',
-      usuario:usuarioDB,
-      token,
+      data :{
+        usuario:usuarioDB,
+        token,
+      }
     })
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      ok:false,
-      msg:'Ocurrio un error al crear usuario',
+    res.json({
+      codigo:400,
+      msg:'Ocurrio un error al renovar token',
     })
   }
 }
